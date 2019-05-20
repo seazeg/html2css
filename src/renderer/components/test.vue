@@ -3,10 +3,11 @@
         <div class="html-work">
             <div class="html2css">
                 <div class="box">
-                    <textarea ref="mycode" v-model="html"></textarea>
+                    <textarea ref="htmlcode" v-model="html"></textarea>
                 </div>
                 <div class="box">
-                    <pre class="line-numbers"><code class="language-css" v-html="output"></code></pre>
+                     <textarea ref="csscode" v-model="output"></textarea>
+                    <!-- <pre class="line-numbers"><code class="language-css" v-html="output"></code></pre> -->
                 </div>
             </div>
 
@@ -18,6 +19,7 @@
 <script>
     import Prism from 'prismjs'
     import "codemirror/theme/cobalt.css";
+    import "codemirror/theme/yonce.css"
     import "codemirror/lib/codemirror.css";
     import "codemirror/addon/hint/show-hint.css";
 
@@ -30,7 +32,8 @@
     require("codemirror/addon/hint/html-hint");
     require("codemirror/addon/edit/closetag");
 
-    window.editor = null;
+    window.htmlEditor = null;
+    window.cssEditor = null;
     export default {
         data() {
             return {
@@ -54,7 +57,7 @@
                     this.toCss(this.eachDom(dom, {}));
                     this.output = this.egUtils.arrUnique(this.cssArr).join('\n');
                     this.$nextTick(function () {
-                        Prism.highlightAll()
+                      cssEditor.setValue(this.output);
                     })
                 } catch (error) {
                     console.warn('标签输入不完整');
@@ -102,12 +105,12 @@
             },
             initEditor() {
                 let _this = this
-                editor = CodeMirror.fromTextArea(this.$refs.mycode, {
+                htmlEditor = CodeMirror.fromTextArea(this.$refs.htmlcode, {
                     mode: 'text/html',
                     indentWithTabs: true,
                     smartIndent: false,
                     matchBrackets: true,
-                    theme: 'cobalt',
+                    theme: 'yonce',
                     styleActiveLine: true,
                     lineNumbers: true,
                     styleSelectedText: false,
@@ -121,9 +124,28 @@
                     }
                 })
 
-                editor.on('changes', function () {
-                    editor.save();
-                    _this.html = editor.getTextArea().value
+                cssEditor = CodeMirror.fromTextArea(this.$refs.csscode, {
+                    mode: 'text/css',
+                    indentWithTabs: true,
+                    smartIndent: false,
+                    matchBrackets: true,
+                    theme: 'yonce',
+                    styleActiveLine: true,
+                    lineNumbers: true,
+                    styleSelectedText: false,
+                    autoCloseTags: true,
+                    line: true,
+                    extraKeys: {
+                        'Ctrl': 'autocomplete'
+                    },
+                    hintOptions: {
+                        completeSingle: false
+                    }
+                })
+
+                htmlEditor.on('changes', function () {
+                    htmlEditor.save();
+                    _this.html = htmlEditor.getTextArea().value
                     _this.transform();
 
                 })
