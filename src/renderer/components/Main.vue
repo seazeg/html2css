@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="html-work">
+        <!-- <div class="html-work">
             <div class="html2css">
                 <div class="box">
                     <textarea ref="htmlcode" v-model="html"></textarea>
@@ -12,8 +12,28 @@
                     <div ref="view" class="html-view"></div>
                 </div>
             </div>
+        </div> -->
+        <div class="html-work">
+            <Split v-model="split" class="html2css" on-move-end="moveEnd">
+                <div slot="left" class="demo-split-pane no-padding">
+                    <Split v-model="split2" mode="vertical" class="html2css">
+                        <div slot="top" class="split_box">
+                            <textarea ref="htmlcode" v-model="html"></textarea>
+                        </div>
+                        <div slot="bottom" class="split_box">
+                            <textarea ref="csscode" v-model="output"></textarea>
+                        </div>
+                    </Split>
+                </div>
+                <div slot="right" class="split_box">
+                    <div ref="view" class="html-view"></div>
+                </div>
+            </Split>
         </div>
     </div>
+
+
+
 </template>
 
 
@@ -24,10 +44,11 @@
     import "codemirror/theme/mdn-like.css"
     import "codemirror/theme/lucario.css"
     import "codemirror/addon/dialog/dialog.css"
-
-
     import "codemirror/lib/codemirror.css";
     import "codemirror/addon/hint/show-hint.css";
+    import {
+        setTimeout
+    } from 'timers';
 
     let CodeMirror = require("codemirror/lib/codemirror");
     require("codemirror/addon/edit/matchbrackets");
@@ -42,6 +63,8 @@
     require("codemirror/addon/search/searchcursor");
     require("codemirror/addon/search/jump-to-line");
     require("codemirror/addon/dialog/dialog");
+    require("codemirror/addon/display/autorefresh");
+
 
 
     window.htmlEditor = null;
@@ -50,202 +73,35 @@
     export default {
         data() {
             return {
-                html: `
-<!-- 底部start -->
-<div class="foot_topbox sd_module">
-    <div class="main_con">
-        <div class="o_g foot_linkbox">
-            <div class="sd_nav">
-                <div class="o_u o_xs_2-2 foot_linkitem">
-                    <div class="foot_linkitem_title">
-                        <div>
-                            <a href="javascript:;">Household</a>
-                        </div>
-                        <div class="o_df-hide o_xs-show foot_linkitem_iconbox js_foot_linkitem_iconbox">
-                            <i class="js_foot_linkitem_hide">+</i>
-                            <i class="js_foot_linkitem_show none">-</i>
-                        </div>
-                    </div>
-                    <ul class="foot_linkitem_conbox js_foot_linkitem_conbox">
-                        <li>
-                            <a href="javascript:;">Refrigerator</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Freezer</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Washer & Dryer</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Air Conditioner</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">TV</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Cooker</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="o_u o_xs_2-2 foot_linkitem">
-                    <div class="foot_linkitem_title">
-                        <div>
-                            <a href="javascript:;">Business</a>
-                        </div>
-                        <div class="o_df-hide o_xs-show foot_linkitem_iconbox js_foot_linkitem_iconbox">
-                            <i class="js_foot_linkitem_hide">+</i>
-                            <i class="js_foot_linkitem_show none">-</i>
-                        </div>
-                    </div>
-                    <ul class="foot_linkitem_conbox js_foot_linkitem_conbox">
-                        <li>
-                            <a href="javascript:;">Commercial Air Conditioner</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Bio Medical</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="o_u o_xs_2-2 foot_linkitem">
-                    <div class="foot_linkitem_title">
-                        <div>
-                            <a href="javascript:;">Service & Support</a>
-                        </div>
-                        <div class="o_df-hide o_xs-show foot_linkitem_iconbox js_foot_linkitem_iconbox">
-                            <i class="js_foot_linkitem_hide">+</i>
-                            <i class="js_foot_linkitem_show none">-</i>
-                        </div>
-                    </div>
-                    <ul class="foot_linkitem_conbox js_foot_linkitem_conbox">
-                        <li>
-                            <a href="javascript:;">Product Registration</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Service Appointment</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Status Tracking</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Spare Parts and Accessories</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Purchase of Warranty Service</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Demo videos</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">FAQ</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Manual  Download</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Warranty Policy</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Contact Us</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="o_u o_xs_2-2 foot_linkitem">
-                    <div class="foot_linkitem_title">
-                        <div>
-                            <a href="javascript:;">Where To Buy</a>
-                        </div>
-                        <div class="o_df-hide o_xs-show foot_linkitem_iconbox js_foot_linkitem_iconbox">
-                            <i class="js_foot_linkitem_hide">+</i>
-                            <i class="js_foot_linkitem_show none">-</i>
-                        </div>
-                    </div>
-                    <ul class="foot_linkitem_conbox js_foot_linkitem_conbox">
-                        <li>
-                            <a href="javascript:;">Online Stores</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Dealers</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="o_u o_xs_2-2 foot_linkitem">
-                    <div class="foot_linkitem_title">
-                        <div>
-                            <a href="javascript:;">About Haier</a>
-                        </div>
-                        <div class="o_df-hide o_xs-show foot_linkitem_iconbox js_foot_linkitem_iconbox">
-                            <i class="js_foot_linkitem_hide">+</i>
-                            <i class="js_foot_linkitem_show none">-</i>
-                        </div>
-                    </div>
-                    <ul class="foot_linkitem_conbox js_foot_linkitem_conbox">
-                        <li>
-                            <a href="javascript:;">Haier Group Profile</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">The Haier Brand</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Haier  UK</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Investor Relations</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">News</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Important Notice</a>
-                        </li>
-                        <li>
-                            <a href="javascript:;">Media Center</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="foot_sharebox">
-            <a href="javascript:;" class="foot_logo o_xs-hide">
-                <img src="../images/hw2019_head_logo.png" alt="">
-            </a>
-            <p>
-                <a href="javascript:;">
-                    <img src="../images/hw2019_foot_flag.png" alt="">
-                    <span>Global / English</span>
-                    <i class="iconfont icon_right"></i>
-                </a>
-            </p>
-            <div class="foot_share">
-                <a href="javascript:;">
-                    <i class="fb_icon"></i>
-                </a>
-                <a href="javascript:;">
-                    <i class="twitter_icon"></i>
-                </a>
-                <a href="javascript:;">
-                    <i class="ins_icon"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="foot_bottombox sd_module">
-    <div class="main_con o_g clearfloat">
-        <div class="foot_door sd_nav">
-            <a href="javascript:;">Haier Group</a>
-            <a href="javascript:;">Contact Us</a>
-            <a href="javascript:;">Job Opportunities</a>
-            <a href="javascript:;">Legal</a>
-        </div>
-        <div class="o_u o_xs_2-2 foot_copy right">
-            <span>Copyright ©2016 Haier Inc.All rights reserved</span>
-        </div>
-    </div>
-</div>
-<!-- 底部end -->`,
-                output: ``,
+                html: `<div>
+	<h2>
+		Html<span>2</span>CSS
+	</h2>
+</div>`,
+                output: `div{
+	width:100%;
+	height:250px;
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	margin:auto;
+	text-align:center;
+	line-height:100px;
+}
+div h2{
+	font-size:500%;
+	color:#111
+}
+div h2 span{
+	color:#F00
+}`,
                 cssArr: [],
+                autoCss: [],
+                // inputCss: [],
                 split: 0.5,
+                split2: 0.5,
                 preview: ``
             }
         },
@@ -254,23 +110,25 @@
                 let _this = this
                 try {
                     let dom = _this.egUtils.trim(_this.html, 'side').split('')[0] == '<' ? _this.$(_this.html) : '';
+                    
                     _this.cssArr = [];
-                    console.log(dom);
                     if (!_this.egUtils.isEmpty(dom)) {
                         for (let i = 0; i < dom.length; i++) {
-                            if (dom.eq(i).get(0).tagName == 'DIV') {
+                            if (dom.eq(i).get(0).tagName) {
                                 _this.toCss(_this.eachDom(dom.eq(i), {}));
-                                _this.output = _this.egUtils.arrUnique(_this.cssArr).join('\n');
-
+                                _this.output = _this.toText(_this.matchEle(_this.autoCss, cssEditor.getTextArea()
+                                    .value))
                             }
                         }
                     } else {
                         _this.output = ``
                     }
                     _this.$nextTick(function () {
+                        htmlEditor.refresh();
                         cssEditor.setValue(_this.output);
                         shadow.innerHTML = _this.preview
                     })
+
 
                 } catch (error) {
                     console.warn('标签输入不完整');
@@ -281,6 +139,7 @@
                 for (let i in data) {
                     if (data[i]) {
                         _this.cssArr.push(`${data[i].result}{\n\n}`)
+                        _this.autoCss.push(`${data[i].result}`)
                         _this.toCss(data[i].children);
                     }
                 }
@@ -356,27 +215,148 @@
                     }
                 })
 
-                htmlEditor.on('changes', function () {
-                    htmlEditor.save();
-                    _this.html = htmlEditor.getTextArea().value;
-                    _this.transform();
+                htmlEditor.on('changes', function (cm, ins) {
+                    if (_this.htmlTagCheck(cm.getValue())){
+                        _this.autoCss = [];
+                        cm.save();
+                        _this.html = cm.getValue();
+                        _this.transform();
+                    }
+
+                    console.log(_this.autoCss);
+                     console.log(cssEditor.getValue());
                 })
 
-                cssEditor.on('changes', function () {
-                    cssEditor.save();
-                    _this.output = cssEditor.getTextArea().value;
+
+                cssEditor.on('changes', function (cm, ins) {
+                    cm.save();
+                    _this.output = cm.getValue();
                     _this.preview = _this.html + `<style>${_this.output}</style>`;
-                    shadow.innerHTML = _this.preview
+                    shadow.innerHTML = _this.preview;
                 })
+
+
             },
             shadowDOM() {
                 shadow = this.$refs.view.createShadowRoot();
+            },
+            welcome() {
+                setTimeout(() => {
+                    this.$nextTick(function () {
+                        htmlEditor.refresh();
+                        cssEditor.refresh();
+                        this.preview = this.html + `<style>${this.output}</style>`;
+                        shadow.innerHTML = this.preview;
+                    })
+                }, 50);
+            },
+            clearBr(key) {
+                //清除换行符
+                key = key.replace(/[\r\n]/g, "");
+                return key;
+            },
+            removeEmptyArrayEle(arr) {
+                //清除数组空元素
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i] == '' || arr[i] == null || arr[i] == undefined) {
+                        arr.splice(i, 1);
+                        i = i - 1;
+                    }
+                }
+                return arr;
+            },
+            matchEle(autocss, inputcss) {
+
+                let _this = this;
+                let arrInputCss = _this.toArray(inputcss);
+                let objInputCss = _this.toObject(inputcss)
+                let diff = this.getArrDifference(autocss, arrInputCss)
+                let same = this.getArrEqual(autocss, diff)
+
+
+                for (let i of same) {
+                    objInputCss.splice(i.index, 0, {
+                        name: i.name,
+                        value: `\n\n`
+                    });
+                }
+                return objInputCss
+
+            },
+            getArrDifference(a, b) {
+                return a.concat(b).filter(function (v, i, arr) {
+                    return arr.indexOf(v) === arr.lastIndexOf(v);
+                });
+            },
+            getArrEqual(a, b) {
+                //获取数组相同元素
+                let newArr = [];
+                for (let i = 0; i < b.length; i++) {
+                    for (let j = 0; j < a.length; j++) {
+                        if (a[j] === b[i]) {
+                            newArr.push({
+                                name: a[j],
+                                index: j
+                            });
+                        }
+                    }
+                }
+                return newArr;
+            },
+            toObject(value) {
+                var _this = this
+                var temp = _this.removeEmptyArrayEle(value.split(/{([\d\D]*?)}/g))
+                var obj = []
+                for (var i = 0; i < temp.length; i++) {
+                    var index = 0;
+                    if (i % 2 == 0) {
+                        obj.push({
+                            name: _this.clearBr(temp[i]),
+                            value: temp[i + 1]
+                        })
+                    } else {
+                        index++;
+                    }
+                }
+                return obj
+            },
+            toArray(value) {
+                return this.removeEmptyArrayEle(this.clearBr(value).replace(/{(.*?)}/g, '|').split('|'))
+            },
+            toText(value) {
+                let res = ''
+                value.forEach((item, index) => {
+                    if (index == value.length - 1) {
+                        res += `${item.name}{${item.value}}`;
+                    } else {
+                        res += `${item.name}{${item.value}}\n`;
+                    }
+                });
+                return res
+
+            },
+            htmlTagCheck(value) {
+                //标签是否闭合伪检测
+                let res = true;
+                let temp = value.replace(/<([^<>]*)>/g, '');
+                if (temp.includes('<') || temp.includes('>')) {
+                    res = false
+                }
+                
+                return res;
+            },
+            moveEnd() {
+                
             }
         },
         mounted() {
             this.shadowDOM()
             this.initEditor();
-            this.transform();
+            this.welcome();
+        },
+        updated() {
+            
+            
         }
     }
 </script>
@@ -390,27 +370,32 @@
     .html2css {
         height: 100%;
         font-size: 0;
-        position: absolute;
+        position: absolute !important;
         top: 0;
         bottom: 0;
         left: 0;
         right: 0
     }
 
-    .html2css .box {
+    .split_box {
         display: inline-block;
-        width: 33.3%;
+        width: 100%;
         height: 100%;
         font-size: 14px;
         vertical-align: top;
         background: #fff;
-        border-right: 1px solid #fff;
+        /* border-right: 1px solid #fff; */
+        overflow-y: auto;
     }
 
-    .html2css .box>* {
+    .split_box>* {
         vertical-align: top;
         height: 100%;
 
+    }
+
+    .html-view {
+        padding-left: 6px;
     }
 
     pre {
@@ -424,5 +409,18 @@
         border: none;
         overflow-y: auto;
         font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important
+    }
+
+    .ivu-split-trigger-horizontal,
+    .ivu-split-trigger-vertical {
+        background: #495e73 !important
+    }
+
+    .ivu-split-trigger-horizontal .ivu-split-trigger-bar {
+        background: #999 !important
+    }
+
+    .ivu-split-trigger {
+        border: 1px solid #353638 !important
     }
 </style>
