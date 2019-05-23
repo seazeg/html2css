@@ -17,10 +17,10 @@
             <Split v-model="split" class="html2css" on-move-end="moveEnd">
                 <div slot="left" class="demo-split-pane no-padding">
                     <Split v-model="split2" mode="vertical" class="html2css">
-                        <div slot="top" class="split_box" id="html">
+                        <div slot="top" class="split_box">
                             <textarea ref="htmlcode" v-model="html"></textarea>
                         </div>
-                        <div slot="bottom" class="split_box" id="css">
+                        <div slot="bottom" class="split_box">
                             <textarea ref="csscode" v-model="output"></textarea>
                         </div>
                     </Split>
@@ -46,6 +46,10 @@
     import "codemirror/addon/dialog/dialog.css"
     import "codemirror/lib/codemirror.css";
     import "codemirror/addon/hint/show-hint.css";
+    import {
+        setTimeout
+    } from 'timers';
+
     let CodeMirror = require("codemirror/lib/codemirror");
     require("codemirror/addon/edit/matchbrackets");
     require("codemirror/addon/selection/active-line");
@@ -60,7 +64,9 @@
     require("codemirror/addon/search/jump-to-line");
     require("codemirror/addon/dialog/dialog");
     require("codemirror/addon/display/autorefresh");
-    import '../ipc/ipc'
+
+
+
     window.htmlEditor = null;
     window.cssEditor = null;
     window.shadow = null;
@@ -110,10 +116,10 @@ div h2 span{
                         for (let i = 0; i < dom.length; i++) {
                             if (dom.eq(i).get(0).tagName) {
                                 _this.toCss(_this.eachDom(dom.eq(i), {}));
-
+                                console.log(_this.autoCss);
                                 // _this.output = _this.toText(_this.matchEle(_this.autoCss, cssEditor.getTextArea()
                                 //     .value))
-
+                                console.log(_this.cssArr);
                                 _this.output = _this.cssArr.join('\n')
                             }
                         }
@@ -213,10 +219,12 @@ div h2 span{
                 })
 
                 htmlEditor.on('changes', function (cm, ins) {
+                    if (_this.htmlTagCheck(cm.getValue())) {
                         _this.autoCss = [];
                         cm.save();
                         _this.html = cm.getValue();
-                        _this.transform();                   
+                        _this.transform();
+                    }
                 })
 
                 cssEditor.on('changes', function (cm, ins) {
@@ -241,113 +249,115 @@ div h2 span{
                     })
                 }, 50);
             },
-            // clearBr(key) {
-            //     //清除换行符
-            //     key = key.replace(/[\r\n]/g, "");
-            //     return key;
-            // },
-            // removeEmptyArrayEle(arr) {
-            //     //清除数组空元素
-            //     for (var i = 0; i < arr.length; i++) {
-            //         if (arr[i] == '' || arr[i] == null || arr[i] == undefined) {
-            //             arr.splice(i, 1);
-            //             i = i - 1;
-            //         }
-            //     }
-            //     return arr;
-            // },
-            // matchEle(autocss, inputcss) {
-            //     let _this = this;
-            //     let arrInputCss = _this.toArray(inputcss);
-            //     let objInputCss = _this.toObject(inputcss)
-            //     let diff, same = null;
-            //     let result = [];
-            //     if (autocss.length >= arrInputCss.length) {
-            //         diff = this.getArrDifference(autocss, arrInputCss)
-            //         same = this.getArrEqual(autocss, diff)
-            //         for (let item of same) {
-            //             objInputCss.splice(i.index, 0, {
-            //                 name: item.name,
-            //                 value: `\n\n`
-            //             });
-            //         }
-            //         result = objInputCss
-            //     } else {
-            //         for (let item of autocss) {
-            //             result.push({
-            //                 name: item,
-            //                 value: `\n\n`
-            //             })
-            //         }
-            //     }
-            //     return result
+            clearBr(key) {
+                //清除换行符
+                key = key.replace(/[\r\n]/g, "");
+                return key;
+            },
+            removeEmptyArrayEle(arr) {
+                //清除数组空元素
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i] == '' || arr[i] == null || arr[i] == undefined) {
+                        arr.splice(i, 1);
+                        i = i - 1;
+                    }
+                }
+                return arr;
+            },
+            matchEle(autocss, inputcss) {
+                let _this = this;
+                let arrInputCss = _this.toArray(inputcss);
+                let objInputCss = _this.toObject(inputcss)
+                let diff, same = null;
+                let result = [];
+                if (autocss.length >= arrInputCss.length) {
+                    console.log(autocss);
+                    console.log(arrInputCss);
+                    diff = this.getArrDifference(autocss, arrInputCss)
+                    same = this.getArrEqual(autocss, diff)
+                    for (let item of same) {
+                        objInputCss.splice(i.index, 0, {
+                            name: item.name,
+                            value: `\n\n`
+                        });
+                    }
+                    result = objInputCss
+                } else {
+                    for (let item of autocss) {
+                        result.push({
+                            name: item,
+                            value: `\n\n`
+                        })
+                    }
+                }
+                return result
 
-            // },
-            // getArrDifference(a, b) {
-            //     return a.concat(b).filter(function (v, i, arr) {
-            //         return arr.indexOf(v) === arr.lastIndexOf(v);
-            //     });
-            // },
-            // getArrEqual(a, b) {
-            //     //获取数组相同元素
-            //     let newArr = [];
-            //     for (let i = 0; i < b.length; i++) {
-            //         for (let j = 0; j < a.length; j++) {
-            //             if (a[j] === b[i]) {
-            //                 newArr.push({
-            //                     name: a[j],
-            //                     index: j
-            //                 });
-            //             }
-            //         }
-            //     }
-            //     return newArr;
-            // },
-            // toObject(value) {
-            //     var _this = this
-            //     var temp = _this.removeEmptyArrayEle(value.split(/{([\d\D]*?)}/g))
-            //     var obj = []
-            //     for (var i = 0; i < temp.length; i++) {
-            //         var index = 0;
-            //         if (i % 2 == 0) {
-            //             obj.push({
-            //                 name: _this.clearBr(temp[i]),
-            //                 value: temp[i + 1]
-            //             })
-            //         } else {
-            //             index++;
-            //         }
-            //     }
-            //     return obj
-            // },
-            // toArray(value) {
-            //     return this.removeEmptyArrayEle(this.clearBr(value).replace(/{(.*?)}/g, '|').split('|'))
-            // },
-            // toText(value) {
-            //     let res = ''
-            //     value.forEach((item, index) => {
-            //         if (index == value.length - 1) {
-            //             res += `${item.name}{${item.value}}`;
-            //         } else {
-            //             res += `${item.name}{${item.value}}\n`;
-            //         }
-            //     });
-            //     return res
+            },
+            getArrDifference(a, b) {
+                return a.concat(b).filter(function (v, i, arr) {
+                    return arr.indexOf(v) === arr.lastIndexOf(v);
+                });
+            },
+            getArrEqual(a, b) {
+                //获取数组相同元素
+                let newArr = [];
+                for (let i = 0; i < b.length; i++) {
+                    for (let j = 0; j < a.length; j++) {
+                        if (a[j] === b[i]) {
+                            newArr.push({
+                                name: a[j],
+                                index: j
+                            });
+                        }
+                    }
+                }
+                return newArr;
+            },
+            toObject(value) {
+                var _this = this
+                var temp = _this.removeEmptyArrayEle(value.split(/{([\d\D]*?)}/g))
+                var obj = []
+                for (var i = 0; i < temp.length; i++) {
+                    var index = 0;
+                    if (i % 2 == 0) {
+                        obj.push({
+                            name: _this.clearBr(temp[i]),
+                            value: temp[i + 1]
+                        })
+                    } else {
+                        index++;
+                    }
+                }
+                return obj
+            },
+            toArray(value) {
+                return this.removeEmptyArrayEle(this.clearBr(value).replace(/{(.*?)}/g, '|').split('|'))
+            },
+            toText(value) {
+                let res = ''
+                value.forEach((item, index) => {
+                    if (index == value.length - 1) {
+                        res += `${item.name}{${item.value}}`;
+                    } else {
+                        res += `${item.name}{${item.value}}\n`;
+                    }
+                });
+                return res
 
-            // },
-            // htmlTagCheck(value) {
-            //     //标签是否闭合伪检测
-            //     let res = true;
-            //     let temp = value.replace(/<([^<>]*)>/g, '');
-            //     if (temp.includes('<') || temp.includes('>')) {
-            //         res = false
-            //     }
+            },
+            htmlTagCheck(value) {
+                //标签是否闭合伪检测
+                let res = true;
+                let temp = value.replace(/<([^<>]*)>/g, '');
+                if (temp.includes('<') || temp.includes('>')) {
+                    res = false
+                }
 
-            //     return res;
-            // },
-            // moveEnd() {
+                return res;
+            },
+            moveEnd() {
 
-            // }
+            }
         },
         mounted() {
             this.shadowDOM()

@@ -1,4 +1,14 @@
-import { app, BrowserWindow } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItem,
+  dialog,
+  ipcMain
+} from 'electron'
+import {
+  appMenuTemplate
+} from './menu';
 
 /**
  * Set `__static` path to static files in production
@@ -9,11 +19,11 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+const winURL = process.env.NODE_ENV === 'development' ?
+  `http://localhost:9080` :
+  `file://${__dirname}/index.html`
 
-function createWindow () {
+function createWindow() {
   /**
    * Initial window options
    */
@@ -28,6 +38,32 @@ function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  const menu = Menu.buildFromTemplate(appMenuTemplate);
+  menu.items[0].submenu.append(new MenuItem({
+    label: "New",
+    click() {
+      mainWindow.webContents.send('action', 'new');
+    },
+    accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
+  }));
+  menu.items[0].submenu.append(new MenuItem({
+    label: "Open",
+    click() {
+      mainWindow.webContents.send('action', 'open');
+    },
+    accelerator: 'CmdOrCtrl+O' //快捷键：Ctrl+O
+  }));
+  menu.items[0].submenu.append(new MenuItem({
+    label: "Save",
+    click() {
+      mainWindow.webContents.send('action', 'save');
+    },
+    accelerator: 'CmdOrCtrl+S' //快捷键：Ctrl+S
+  }));
+
+  Menu.setApplicationMenu(menu);
+
 }
 
 app.on('ready', createWindow)
@@ -43,6 +79,9 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+
+
 
 /**
  * Auto Updater
