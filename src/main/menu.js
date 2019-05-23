@@ -1,5 +1,3 @@
-const { app } = require('electron');
-
 export var appMenuTemplate = [
     {
         label: 'File',

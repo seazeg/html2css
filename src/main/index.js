@@ -41,25 +41,53 @@ function createWindow() {
 
   const menu = Menu.buildFromTemplate(appMenuTemplate);
   menu.items[0].submenu.append(new MenuItem({
-    label: "New",
+    label: "新建工程",
     click() {
       mainWindow.webContents.send('action', 'new');
     },
     accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
   }));
   menu.items[0].submenu.append(new MenuItem({
-    label: "Open",
+    label: "打开工程",
     click() {
       mainWindow.webContents.send('action', 'open');
     },
     accelerator: 'CmdOrCtrl+O' //快捷键：Ctrl+O
   }));
   menu.items[0].submenu.append(new MenuItem({
-    label: "Save",
+    label: "保存工程",
     click() {
       mainWindow.webContents.send('action', 'save');
     },
     accelerator: 'CmdOrCtrl+S' //快捷键：Ctrl+S
+  }));
+  menu.items[0].submenu.append(new MenuItem({
+    label: "导入",
+    submenu: [{
+      label: "HTML",
+      click() {
+        mainWindow.webContents.send('action', 'importHTML');
+      },
+    }, {
+      label: "CSS",
+      click() {
+        mainWindow.webContents.send('action', 'importCSS');
+      },
+    }]
+  }));
+  menu.items[0].submenu.append(new MenuItem({
+    label: "导出",
+    submenu: [{
+      label: "HTML",
+      click() {
+        mainWindow.webContents.send('action', 'exportHTML');
+      },
+    }, {
+      label: "CSS",
+      click() {
+        mainWindow.webContents.send('action', 'exportCSS');
+      },
+    }]
   }));
 
   Menu.setApplicationMenu(menu);

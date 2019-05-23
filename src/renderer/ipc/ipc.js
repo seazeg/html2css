@@ -19,11 +19,11 @@ document.title = "Html2CSS"; //设置文档标题，影响窗口标题栏名称
 
 setTimeout(() => {
     htmlEditor.on('changes', function (cm, ins) {
-        if (isSaved&&!document.title.includes('*')) document.title += " *";
+        if (isSaved && !document.title.includes('*')) document.title += " *";
         isSaved = false;
     })
     cssEditor.on('changes', function (cm, ins) {
-        if (isSaved&&!document.title.includes('*')) document.title += " *";
+        if (isSaved && !document.title.includes('*')) document.title += " *";
         isSaved = false;
     })
 }, 100);
@@ -58,8 +58,8 @@ ipcRenderer.on('action', (event, arg) => {
             if (files) {
                 currentInfoFile = files[0]
                 let path = files[0].split('/').splice(0, files[0].split('/').length - 1).join('/');
-                let name = files[0].split('/').splice(files[0].split('/').length - 1, 1);
-
+                let name = (files[0].split('/').splice(files[0].split('/').length - 1, 1))[0].split('.')[0];
+                console.log(name);
                 htmlEditor.setValue(readContent(`${path}/${name}.html`));
                 cssEditor.setValue(readContent(`${path}/${name}.css`));
 
@@ -67,8 +67,20 @@ ipcRenderer.on('action', (event, arg) => {
                 isSaved = true;
             }
             break;
-        case 'save': //保存文件
+        case 'save':
             saveCurrentDoc();
+            break;
+        case 'importHTML':
+            importFile('html');
+            break;
+        case 'importCSS':
+            importFile('css');
+            break;
+        case 'exportHTML':
+            exportFile('html')
+            break;
+        case 'exportCSS':
+            exportFile('css')
             break;
     }
 });
@@ -82,6 +94,94 @@ function readContent(file) {
 function saveContent(text, file) {
     const fs = require('fs');
     fs.writeFileSync(file, text);
+}
+
+//导入文件
+function importFile(type) {
+    if (type == 'html') {
+        askSaveIfNeed();
+        const files = remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+            filters: [{
+                    name: "Text Files",
+                    extensions: ['html']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ],
+            properties: ['openFile']
+        });
+        if (files) {
+            let path = files[0].split('/').splice(0, files[0].split('/').length - 1).join('/');
+            let name = (files[0].split('/').splice(files[0].split('/').length - 1, 1))[0].split('.')[0];
+            htmlEditor.setValue(readContent(`${path}/${name}.html`));
+            isSaved = true;
+        }
+    } else {
+        askSaveIfNeed();
+        const files = remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+            filters: [{
+                    name: "Text Files",
+                    extensions: ['css']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ],
+            properties: ['openFile']
+        });
+        if (files) {
+            let path = files[0].split('/').splice(0, files[0].split('/').length - 1).join('/');
+            let name = (files[0].split('/').splice(files[0].split('/').length - 1, 1))[0].split('.')[0];
+            cssEditor.setValue(readContent(`${path}/${name}.css`));
+            isSaved = true;
+        }
+    }
+}
+
+//导出文件
+function exportFile(type) {
+    if (type == 'html') {
+        const file = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+            filters: [{
+                    name: 'Text Files',
+                    extensions: ['html']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ]
+        });
+        if (file) {
+            let path = file.split('/').splice(0, file.split('/').length - 1).join('/');
+            let name = file.split('/').splice(file.split('/').length - 1, 1);
+            currentHtmlFile = `${path}/${name}.html`
+        }
+        const htmlSave = htmlEditor.getValue();
+        saveContent(htmlSave, currentHtmlFile);
+    } else {
+        const file = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+            filters: [{
+                    name: 'Text Files',
+                    extensions: ['css']
+                },
+                {
+                    name: 'All Files',
+                    extensions: ['*']
+                }
+            ]
+        });
+        if (file) {
+            let path = file.split('/').splice(0, file.split('/').length - 1).join('/');
+            let name = file.split('/').splice(file.split('/').length - 1, 1);
+            currentCssFile = `${path}/${name}.css`
+        }
+        const cssSave = htmlEditor.getValue();
+        saveContent(cssSave, currentCssFile);
+    }
 }
 
 //保存当前文档
@@ -101,7 +201,7 @@ function saveCurrentDoc() {
         });
         if (file) {
             path = file.split('/').splice(0, file.split('/').length - 1).join('/');
-            name = file.split('/').splice(file.split('/').length - 1, 1);
+            name = (file.split('/').splice(file.split('/').length - 1, 1))[0].split('.')[0];
             currentHtmlFile = `${path}/${name}.html`
             currentCssFile = `${path}/${name}.css`
             currentInfoFile = file
@@ -122,7 +222,7 @@ function saveCurrentDoc() {
 function askSaveIfNeed() {
     if (isSaved) return;
     const response = dialog.showMessageBox(remote.getCurrentWindow(), {
-        message: 'Do you want to save the current document?',
+        message: '是否需要保存当前内容?',
         type: 'question',
         buttons: ['Yes', 'No']
     });
