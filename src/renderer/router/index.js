@@ -5,10 +5,15 @@ Vue.use(Router)
 
 export default new Router({
   routes: [
+    // {
+    //   path: '/',
+    //   name: 'Main',
+    //   component: require('@/components/Main').default
+    // },
     {
       path: '/',
-      name: 'Main',
-      component: require('@/components/Main').default
+      name: 'px2rem',
+      component: require('@/components/px2rem').default
     },
     {
       path: '*',

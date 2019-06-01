@@ -18,11 +18,11 @@ let css = document.getElementById('css');
 document.title = "Html2CSS"; //设置文档标题，影响窗口标题栏名称
 
 setTimeout(() => {
-    htmlEditor.on('changes', function (cm, ins) {
+    pxEditor.on('changes', function (cm, ins) {
         if (isSaved && !document.title.includes('*')) document.title += " *";
         isSaved = false;
     })
-    cssEditor.on('changes', function (cm, ins) {
+    remEditor.on('changes', function (cm, ins) {
         if (isSaved && !document.title.includes('*')) document.title += " *";
         isSaved = false;
     })
