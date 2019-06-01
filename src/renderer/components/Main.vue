@@ -60,7 +60,7 @@
     require("codemirror/addon/search/jump-to-line");
     require("codemirror/addon/dialog/dialog");
     require("codemirror/addon/display/autorefresh");
-    import '../ipc/ipc'
+    // import '../ipc/ipc'
     window.htmlEditor = null;
     window.cssEditor = null;
     window.shadow = null;

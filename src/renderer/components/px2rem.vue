@@ -1,15 +1,16 @@
 <template>
     <div class="html-work">
         <div class="group">
+            <Button type="success" @click="handle('p2r')" class="conversion">px2rem</Button>
             <Input placeholder="ratio" v-model="ratio" class="ratio" />
-            <Button type="success" @click="handle" class="conversion">转换</Button>
+            <Button type="success" @click="handle('r2p')" class="conversion">rem2px</Button>
         </div>
         <div class="html2css">
             <div class="split_box" id="html">
-                <textarea ref="htmlcode" v-model="pxCon"></textarea>
+                <textarea ref="htmlcode" v-model="source"></textarea>
             </div>
             <div class="split_box" id="css">
-                <textarea ref="csscode" v-model="remCon"></textarea>
+                <textarea ref="csscode" v-model="result"></textarea>
             </div>
         </div>
     </div>
@@ -38,102 +39,72 @@
     require("codemirror/addon/dialog/dialog");
     require("codemirror/addon/display/autorefresh");
     import '../ipc/ipc'
-    window.pxEditor = null;
-    window.remEditor = null;
+    window.sourceEditor = null;
+    window.resultEditor = null;
     export default {
         data() {
             return {
-                pxCon: `.item{
-     width: 2rem;
-     height: 1.5rem;
+                source: `.item{
+     width: 200px;
+     height: 1.5px;
      border: 1px solid #ccc;
-     margin: 0.1rem auto;
-     padding: 0.05rem 0.1rem 0.2rem 0.2rem;
+     margin: 10px auto;
+     padding: 5px 10px 20px 20px;
+
 }
 `,
-                remCon: ` 
- `,
-                ratio: 100,
-                split: 0.5,
-                split2: 0.5,
+                result: ``,
+                ratio: 100
             }
         },
         methods: {
-            handle(){
-                
+            handle(type) {
+                let _this = this;
+                _this.converter(type)
             },
-            px2rem() {
+            converter(type) {
                 let _this = this
-                let pxCon = _this.pxCon;
+                let source = _this.source;
                 let ratio = _this.ratio;
-                if (pxCon) {
-                    pxCon = $.format(pxCon, {
+                if (source) {
+                    source = $.format(source, {
                         method: "css"
                     }); // 都转换成多行来比较
-                    let arr = pxCon.split("\n");
+                    let arr = source.split("\n");
+                    let len = arr.length;
                     let res = '';
-                    for (let i = 0; i < arr.length; i++) {
-                        let line = arr[i];
-                        res += line.replace(/\d+px/g, function (px) {
-                            if (true) {
-                                if (!/border:/ig.test(line)) {
-                                    return (parseInt(px) / parseInt(ratio)) + "rem";
-                                } else {
+                    if (type == 'p2r') {
+                        for (let i = 0; i < len; i++) {
+                            let line = arr[i];
+                            res += line.replace(/([1-9]\d*.\d*|0.\d*[1-9]\d*|\d*[1-9]\d*)px/g, function (px) {
+                                if (!!px) {
+                                    if (!/border:/ig.test(line)) {
+                                        return (parseFloat(px) / parseInt(ratio)) + "rem";
+                                    } else {
+                                        return px;
+                                    }
+                                }else {
                                     return px;
                                 }
-                            } else {
-                                return (parseInt(px) / parseInt(ratio)) + "rem";
-                            }
-                        }) + "\n";
-                    }
-                    let source = _this.pxCon;
-                    let sourceArr = source.split("\n");
-                    let len = sourceArr.length;
-                    if (len > 1) {
-                        res = $.format(res, {
-                            method: "css"
-                        });
-                    } else {
-                        res = $.format(res, {
-                            method: "cssmin"
-                        });
-                    }
-                    _this.remCon = res
-                    remEditor.setValue(_this.remCon);
-                }
-            },
-            rem2px() {
-                let _this = this
-                let remCon = _this.remCon;
-                let ratio = _this.ratio || 100;
-                if (remCon) {
-                    remCon = $.format(remCon, {
-                        method: "css"
-                    }); // 都转换成多行来比较
-                    let arr = remCon.split("\n");
-                    let res = '';
-                    for (let i = 0; i < arr.length; i++) {
-                        let line = arr[i];
-                        res += line.replace(/([1-9]\d*.\d*|0.\d*[1-9]\d*|\d*[1-9]\d*)rem/g, function (rem) {
-                            console.log(rem);
-                            if (!!rem) {
-                                if ($("#chkIgnoreBorder").is(":checked")) {
+                            }) + "\n";
+                        }
+                    } else if (type == 'r2p') {
+                        for (let i = 0; i < len; i++) {
+                            let line = arr[i];
+                            res += line.replace(/([1-9]\d*.\d*|0.\d*[1-9]\d*|\d*[1-9]\d*)rem/g, function (rem) {
+                                if (!!rem) {
                                     if (!/border:/ig.test(line)) {
                                         return (parseFloat(rem) * parseInt(ratio)) + "px";
                                     } else {
                                         return rem;
                                     }
                                 } else {
-                                    return (parseFloat(rem) * parseInt(ratio)) + "px";
+                                    return rem;
                                 }
-                            } else {
-                                return rem
-                            }
-                        }) + "\n";
+                            }) + "\n";
+                        }
                     }
-                    let source = _this.remCon;
-                    let sourceArr = source.split("\n");
-                    let len = sourceArr.length;
+
                     if (len > 1) {
                         res = $.format(res, {
                             method: "css"
@@ -143,14 +114,14 @@
                             method: "cssmin"
                         });
                     }
-                    _this.pxCon = res
-                    pxEditor.setValue(_this.pxCon);
+                    _this.result = res
+                    resultEditor.setValue(_this.result);
                 }
 
             },
             initEditor() {
                 let _this = this
-                pxEditor = CodeMirror.fromTextArea(_this.$refs.htmlcode, {
+                sourceEditor = CodeMirror.fromTextArea(_this.$refs.htmlcode, {
                     mode: 'text/css',
                     indentWithTabs: true,
                     smartIndent: false,
@@ -169,7 +140,7 @@
                     }
                 })
 
-                remEditor = CodeMirror.fromTextArea(_this.$refs.csscode, {
+                resultEditor = CodeMirror.fromTextArea(_this.$refs.csscode, {
                     mode: 'text/css',
                     indentWithTabs: true,
                     smartIndent: false,
@@ -187,20 +158,16 @@
                         completeSingle: false
                     }
                 })
-
-                pxEditor.on('changes', function (cm, ins) {
+                sourceEditor.on('changes', function (cm, ins) {
                     cm.save();
-                    _this.pxCon = cm.getValue();
+                    _this.source = cm.getValue();
                 })
 
-                remEditor.on('changes', function (cm, ins) {
+                resultEditor.on('changes', function (cm, ins) {
                     cm.save();
-                    _this.remCon = cm.getValue();
+                    _this.result = cm.getValue();
                 })
-
-
             }
-
         },
         mounted() {
             this.initEditor();
@@ -270,13 +237,13 @@
         height: 50px;
         cursor: pointer;
         bottom: 0;
-        width: 120px;
+        width: 220px;
         font-size: 0;
     }
 
     .conversion,
     .ratio {
-        width: 50% !important;
+        width: 30% !important;
         display: inline-block !important;
     }
 </style>
